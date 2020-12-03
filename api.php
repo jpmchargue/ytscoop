@@ -6,11 +6,11 @@ ini_set('display_startup_errors', 1);
 
 header("Access-Control-Allow-Origin: ytscoop.com");
 
-if (isset($_POST['url'])) {
+if (isset($_GET['url'])) {
   # Fetch stream attributes, stream locations, and cipher JavaScript.
-  echo "URL: " . $_POST['url'];
+  echo "URL: " . $_GET['url'];
 
-} else if (isset($_POST['js']) && isset($_POST['choices'])) {
+} else if (isset($_GET['js']) && isset($_GET['choices'])) {
   # Decipher selected stream URLs and return them.
   # Choices should be a semicolon/comma-separated string:
   #  - individual streams are separated by semicolons
