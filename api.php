@@ -6,21 +6,6 @@ ini_set('display_startup_errors', 1);
 
 header("Access-Control-Allow-Origin: ytscoop.com");
 
-function urlToID($url) {
-  preg_match_all("/(?:v=|\/)([0-9A-Za-z_-]{11}).*/",
-    $url, $out, PREG_PATTERN_ORDER);
-  return $out[1][0];
-}
-
-function htmlToJavascript($html) {
-  preg_match_all("/(/s/player/[\w\d]+/[\w\d_/.]+/base\.js)/",
-    $html, $out, PREG_PATTERN_ORDER);
-  return $out[0][1];
-}
-
-function htmlToConfig($html) {
-
-}
 
 if (isset($_GET['url'])) {
   # Fetch stream attributes, stream locations, and cipher JavaScript.
@@ -44,5 +29,23 @@ if (isset($_GET['url'])) {
   echo "getting cipher and handling choices";
 
 }
+
+
+function urlToID($url) {
+  preg_match_all("~(?:v=|\/)([0-9A-Za-z_-]{11}).*~",
+    $url, $out, PREG_PATTERN_ORDER);
+  return $out[1][0];
+}
+
+function htmlToJavascript($html) {
+  preg_match_all("~(/s/player/[\w\d]+/[\w\d_/.]+/base\.js)~",
+    $html, $out, PREG_PATTERN_ORDER);
+  return $out[0][1];
+}
+
+function htmlToConfig($html) {
+
+}
+
 
 ?>
