@@ -16,20 +16,21 @@ if (isset($_GET['url'])) {
     $info = getVideoInfo($id); # raw video info data
     $watch = getWatchHTML($id); # raw html from the video watch page
     $jsname = getJSName($watch); # the location of the JavaScript file
-    # 
-    echo $jsname;
+
+    $info_json = extractResponseJSON(urldecode($info));
+    echo $info_json;
+
+    # Send back:
+    # - the video title
+    # - for each of the following streams:
+    #     + the highest-resolution video stream
+    #     + the highest-bitrate audio stream
+    #     + the highest-resolution progressive stream
+    # - include:
+    #     + the deciphered stream URL
+    #     + the dimensions and fps, for video
+    #     + the bitrate, for audio
   }
-
-  echo "URL: " . $_GET['url'];
-
-} else if (isset($_GET['js']) && isset($_GET['choices'])) {
-  # Decipher selected stream URLs and return them.
-  # Choices should be a semicolon/comma-separated string:
-  #  - individual streams are separated by semicolons
-  #  - within each stream 'block', the stream type, quality descriptor, and ciphered URL are separated by commas
-  #    e.g. adaptive,1080p at 30fps and 192kbps,https://...
-  echo "getting cipher and handling choices";
-
 }
 
 
@@ -56,8 +57,15 @@ function getJSName($html) {
   return $out[0][1];
 }
 
-function htmlToConfig($html) {
-
+function extractResponseJSON($raw) {
+  $url_pairs = explode('&', $raw);
+  foreach($url_pairs as $url_pair) {
+    $div = strpos($url_pair, '=');
+    $key = substr($url_pair, 0, $div);
+    if ($key == "player_response") {
+      return substr($url_pair, $div + 1);
+    }
+  }
 }
 
 
