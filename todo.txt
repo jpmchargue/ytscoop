@@ -1,0 +1,41 @@
+https://youtube.com/get_video_info?video_id=YbJOTdZBX1g&eurl=https%3A//www.youtube.com/watch%3Fv%3DYbJOTdZBX1g&ps=default&hl=en_US
+
+Apply the following transformations to the data retrieved from the info URL:
+  parse_qsl()- parse from URL encoding. This yields a list of (key, value) pairs.
+  Pull the value associated with 'player_response'. This is the string for a JSON object.
+  Convert the string to a JSON object.
+  Open the 'streamingData' subobject of that object. 
+  It contains a list called 'formats' of streaming data subobjects. These objects all have the following fields:
+	- itag
+	- url, the encrypted URL of the source video
+	- mimeType, a brief description of the type of stream it is
+	- bitrate
+	if video:
+		- width, a number
+		- height, a number
+		- initRange, an object
+		- indexRange, an object
+		- lastModified (unix timestamp?)
+		- contentLength (likely in bits)
+		- quality, an string adjective describing the quality
+		- fps, a number
+		- qualityLabel, e.g. '1080p'
+		- projectionType, a string
+		- averageBitrate, a number
+		- colorInfo, an object
+		- approxDurationMs, a string representing the number of milliseconds in the video
+	if audio:
+		- initRange, an object
+		- indexRange, an object
+		- lastModified
+		- contentLength
+		- quality
+		- projectionType
+		- averageBitrate
+		- highReplication, a boolean
+		- audioQuality, a string keyword (e.g. 'AUDIO_QUALITY_MEDIUM')
+		- approxDurationMs
+		- audioSampleRate, a string representing the integer sample rate
+		- audioChannels, an integer
+		- loudnessDb, a float
+	See samples.png for examples of stream objects.
