@@ -11,10 +11,12 @@ if (isset($_GET['url'])) {
   # Fetch stream attributes, stream locations, and cipher JavaScript.
   $url = $_GET['url'];
   if (strpos($url, "youtube.com") !== false || strpos($url, "youtu.be") !== false) {
-    $id = urlToID($url);
-    echo $id;
-    $html = file_get_contents('https://youtube.com/watch?v=' . $id);
-    $jsname = htmlToJavascript($html);
+    $id = extractID($url);
+    # Fetch necessary information
+    $info = getVideoInfo($id); # raw video info data
+    $watch = getWatchHTML($id); # raw html from the video watch page
+    $jsname = getJSName($watch); # the location of the JavaScript file
+    # 
     echo $jsname;
   }
 
@@ -31,13 +33,24 @@ if (isset($_GET['url'])) {
 }
 
 
-function urlToID($url) {
+function extractID($url) {
   preg_match_all("~(?:v=|\/)([0-9A-Za-z_-]{11}).*~",
     $url, $out, PREG_PATTERN_ORDER);
   return $out[1][0];
 }
 
-function htmlToJavascript($html) {
+function getWatchHTML($id) {
+  return file_get_contents('https://youtube.com/watch?v=' . $id);
+}
+
+function getVideoInfo($id) {
+  $url = "https://youtube.com/get_video_info?ps=default&hl=en_US"
+    . "video_id=" . $id
+    . "&eurl=https%3A//www.youtube.com/watch%3Fv%3D" . $id;
+  return file_get_contents($url);
+}
+
+function getJSName($html) {
   preg_match_all("~(/s/player/[\w\d]+/[\w\d_/.]+/base\.js)~",
     $html, $out, PREG_PATTERN_ORDER);
   return $out[0][1];
