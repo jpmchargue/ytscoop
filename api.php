@@ -147,8 +147,7 @@ function getCipherFunctionName($js) {
         "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~"  # noqa: E501
     );
     foreach($patterns as $p) {
-      preg_match_all($p, $js, $out, PREG_PATTERN_ORDER);
-      if (count($out) > 0) {
+      if (preg_match_all($p, $js, $out, PREG_PATTERN_ORDER)) {
         return $out[0][1];
       }
     }
