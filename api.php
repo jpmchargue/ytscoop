@@ -16,6 +16,8 @@ if (isset($_GET['url'])) {
     $info = getVideoInfo($id); # raw video info data
     $info_json = extractResponseJSON(urldecode($info));
 
+    $num_pro = count($info_json->streamingData->formats);
+    echo strval($num_pro) . " progressive streams found<br>";
     $best_pro = NULL;
     foreach($info_json->streamingData->formats as $s) {
       if ($best_pro == NULL || $s->width > $best_pro->width) {
@@ -23,6 +25,8 @@ if (isset($_GET['url'])) {
       }
     }
 
+    $num_adapt = count($info_json->streamingData->adaptiveFormats);
+    echo strval($num_adapt) . " adaptive streams found<br>";
     $best_video = NULL;
     $best_audio = NULL;
     foreach($info_json->streamingData->adaptiveFormats as $s) {
