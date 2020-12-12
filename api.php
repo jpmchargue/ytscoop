@@ -18,7 +18,45 @@ if (isset($_GET['url'])) {
     $jsname = getJSName($watch); # the location of the JavaScript file
 
     $info_json = extractResponseJSON(urldecode($info));
-    echo print_r($info_json->streamingData);
+
+    $best_pro = NULL;
+    foreach($info_json->streamingData->formats as $s) {
+      if ($best_pro == NULL || $s->width > $best_pro->width) {
+        $best_pro = $s;
+      }
+    }
+
+    $best_video = NULL;
+    $best_audio = NULL;
+    foreach($info_json->streamingData->adaptiveFormats as $s) {
+      $type = substr($s->mimeType, 0, 5);
+      if ($type == "video") {
+        if ($best_video == NULL || $s->width > $best_video->width) {
+          $best_video = $s;
+        } else if ($s->width == $best_video->width && $s->fps > $best_video->fps) {
+          $best_video = $s;
+        }
+      }
+      else if ($type == "audio") {
+        if ($best_audio == NULL || $s->averageBitrate > $best_audio->averageBitrate) {
+          $best_audio = $s;
+        }
+      }
+    }
+
+    $quality_map = array(
+      "AUDIO_QUALITY_LOW"=>"low",
+      "AUDIO_QUALITY_MEDIUM"=>"medium",
+      "AUDIO_QUALITY_HIGH"=>"high",
+    );
+
+    echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ " . $best_pro->fps
+      . " with " . $quality_map[$best_pro->audioQuality]
+      . ": <br>" . $best_pro->url . "<br>";
+    echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps
+      . ": <br>" . $best_pro->url . "<br>";
+    echo "Best Audio Stream: " . $best_pro->bitrate . " kbps (" . $best_pro->bitrate
+      . "): <br>" . $best_pro->url . "<br>";
 
     # Send back:
     # - the video title

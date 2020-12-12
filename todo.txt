@@ -39,3 +39,14 @@ Apply the following transformations to the data retrieved from the info URL:
 		- audioChannels, an integer
 		- loudnessDb, a float
 	See samples.png for examples of stream objects.
+
+For videos, keep:
+	- url
+	- qualityLabel
+	- fps
+	- width and height (to allow users to confirm qualityLabel)
+For audio, keep:
+	- url
+	- audioQuality
+	- averageSampleRate
+	- audioChannels
