@@ -35,7 +35,7 @@ if (isset($_GET['url'])) {
         }
       }
       else if ($type == "audio") {
-        if ($best_audio == NULL || $s->averageBitrate > $best_audio->averageBitrate) {
+        if ($best_audio == NULL || $s->bitrate > $best_audio->bitrate) {
           $best_audio = $s;
         }
       }
