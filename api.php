@@ -63,11 +63,16 @@ if (isset($_GET['url'])) {
         . ": <br>" . audioTag($best_audio->url) . "<br>";
     } else {
       # The stream URLs must be decrypted.
-      # The decryption process requires the video JavaScript file, and the watch-page HTML
-      # must be scraped to find the file's URL.
-      echo "The URLs of this video's streams are <i>encrypted</i>. YTScoop currently does not have the functionality to decrypt URLs.";
-      #$watch = getWatchHTML($id); # raw html from the video watch page
-      #$jsname = getJSName($watch); # the location of the JavaScript file
+      # The decryption algorithm can be reverse-engineered via the video's JavaScript file;
+      # the location of this file can be found in the video's watch page HTML.
+      echo "The URLs of this video's streams are <i>encrypted</i>.";
+      # Get the JavaScript file
+      $watch = getWatchHTML($id);
+      $jsname = getJSName($watch);
+      $js = file_get_contents('https://youtube.com' . $jsname);
+      # Find location of cipher function
+      $transform_function_name = getCipherFunctionName($js);
+      echo '<br>' . $transform_function_name;
     }
 
 
@@ -124,6 +129,48 @@ function extractResponseJSON($raw) {
 function audioTag($url) {
   # Creates an HTML audio tag with the given URL as a source.
   return '<audio src="' . $url . '" controls></audio>';
+}
+
+function getCipherFunctionName($js) {
+  $patterns = array(
+        "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        "~\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        '~(?:\b|[^a-zA-Z0-9$])(?P<sig>[a-zA-Z0-9$]{2})\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)~',  # noqa: E501
+        '~(?P<sig>[a-zA-Z0-9$]+)\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)~',  # noqa: E501
+        '~(["\'])signature\1\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~',
+        "~\.sig\|\|(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~yt\.akamaized\.net/\)\s*\|\|\s*.*?\s*[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?:encodeURIComponent\s*\()?\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        "~\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        "~\bc\s*&&\s*a\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
+        "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~"  # noqa: E501
+    );
+    foreach($patterns as $p) {
+      preg_match_all($p, $js, $out, PREG_PATTERN_ORDER);
+      if (count($out) > 0) {
+        return $out[0][1];
+      }
+    }
+    return "";
+}
+
+function cipher_reverse($str, $n) {
+  return strrev($str, $n);
+}
+
+function cipher_splice($str, $n) {
+  return substr($str, $n);
+}
+
+function cipher_swap($str, $n) {
+  $index = $n % strlen($str);
+  if ($index == 0) return $str;
+  $acc = substr($str, $index, 1)
+    . substr($str, 1, $index - 1)
+    . substr($str, 0, 1)
+    . substr($str, $index + 1);
+  return $acc;
 }
 
 ?>
