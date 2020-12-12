@@ -51,8 +51,9 @@ if (isset($_GET['url'])) {
       "AUDIO_QUALITY_HIGH"=>"high",
     );
 
-    if (strpos($best_pro->url, "signature=") !== false
-      || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false)) {
+    if (property_exists($best_pro, 'url')
+      && (strpos($best_pro->url, "signature=") !== false
+      || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false))) {
       echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
         . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
         . ": <br>" . audioTag($best_pro->url) . "<br>";
@@ -64,7 +65,7 @@ if (isset($_GET['url'])) {
       # The stream URLs must be decrypted.
       # The decryption process requires the video JavaScript file, and the watch-page HTML
       # must be scraped to find the file's URL.
-      echo 'The stream URLs need to be decrypted-- YTScoop does not yet have the functionality to decrypt URLs.';
+      echo "The URLs of this video's streams are <i>encrypted</i>. YTScoop currently does not have the functionality to decrypt URLs.";
       #$watch = getWatchHTML($id); # raw html from the video watch page
       #$jsname = getJSName($watch); # the location of the JavaScript file
     }
