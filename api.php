@@ -50,13 +50,19 @@ if (isset($_GET['url'])) {
       "AUDIO_QUALITY_HIGH"=>"high",
     );
 
-    echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ " . $best_pro->fps
-      . " with " . $quality_map[$best_pro->audioQuality]
-      . ": <br>" . $best_pro->url . "<br>";
-    echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps
-      . ": <br>" . $best_pro->url . "<br>";
-    echo "Best Audio Stream: " . $best_pro->bitrate . " kbps (" . $best_pro->bitrate
-      . "): <br>" . $best_pro->url . "<br>";
+    if (strpos($best_pro->url, "signature=") !== false
+      || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false)) {
+      echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ " . $best_pro->fps
+        . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
+        . ": <br><a href=" . $best_pro->url . ">Link</a><br>";
+      echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps
+        . "fps: <br><a href=" . $best_pro->url . ">Link</a><br>";
+      echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality]
+        . "): <br><a href=" . $best_pro->url . ">Link</a><br>";
+    } else {
+      echo 'The stream URLs need to be decrypted-- YTScoop does not yet have the functionality to decrypt URLs.'
+    }
+
 
     # Send back:
     # - the video title
