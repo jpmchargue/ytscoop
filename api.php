@@ -18,7 +18,7 @@ if (isset($_GET['url'])) {
     $jsname = getJSName($watch); # the location of the JavaScript file
 
     $info_json = extractResponseJSON(urldecode($info));
-    echo $info_json;
+    echo print_r($info_json->streamingData);
 
     # Send back:
     # - the video title
@@ -30,6 +30,8 @@ if (isset($_GET['url'])) {
     #     + the deciphered stream URL
     #     + the dimensions and fps, for video
     #     + the bitrate, for audio
+
+    # Add means of measuring time from request to response, for testing
   }
 }
 
@@ -46,7 +48,7 @@ function getWatchHTML($id) {
 
 function getVideoInfo($id) {
   $url = "https://youtube.com/get_video_info?ps=default&hl=en_US"
-    . "video_id=" . $id
+    . "&video_id=" . $id
     . "&eurl=https%3A//www.youtube.com/watch%3Fv%3D" . $id;
   return file_get_contents($url);
 }
@@ -58,12 +60,13 @@ function getJSName($html) {
 }
 
 function extractResponseJSON($raw) {
+  # Returns an object representing the metadata JSON in an info file.
   $url_pairs = explode('&', $raw);
   foreach($url_pairs as $url_pair) {
     $div = strpos($url_pair, '=');
     $key = substr($url_pair, 0, $div);
     if ($key == "player_response") {
-      return substr($url_pair, $div + 1);
+      return json_decode(substr($url_pair, $div + 1));
     }
   }
 }
