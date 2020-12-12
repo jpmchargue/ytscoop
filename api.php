@@ -56,11 +56,11 @@ if (isset($_GET['url'])) {
         . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
         . ": <br><a href=" . $best_pro->url . ">Link</a><br>";
       echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps
-        . "fps: <br><a href=" . $best_pro->url . ">Link</a><br>";
+        . "fps: <br><a href=" . $best_video->url . ">Link</a><br>";
       echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality]
-        . "): <br><a href=" . $best_pro->url . ">Link</a><br>";
+        . "): <br><a href=" . $best_audio->url . ">Link</a><br>";
     } else {
-      echo 'The stream URLs need to be decrypted-- YTScoop does not yet have the functionality to decrypt URLs.'
+      echo 'The stream URLs need to be decrypted-- YTScoop does not yet have the functionality to decrypt URLs.';
     }
 
 
