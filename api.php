@@ -14,9 +14,6 @@ if (isset($_GET['url'])) {
     $id = extractID($url);
     # Fetch necessary information
     $info = getVideoInfo($id); # raw video info data
-    $watch = getWatchHTML($id); # raw html from the video watch page
-    $jsname = getJSName($watch); # the location of the JavaScript file
-
     $info_json = extractResponseJSON(urldecode($info));
 
     $best_pro = NULL;
@@ -52,16 +49,20 @@ if (isset($_GET['url'])) {
 
     if (strpos($best_pro->url, "signature=") !== false
       || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false)) {
-      echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ " . $best_pro->fps
-        . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
-        . ": <br><a href=" . $best_pro->url . " target='_blank'>Link</a><br>";
-      echo '<video controls width="250"><source src=' . $best_pro->url . '></video>';
-      echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps
-        . "fps: <br><a href=" . $best_video->url . " target='_blank'>Link</a><br>";
-      echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality]
-        . "): <br><a href=" . $best_audio->url . " target='_blank'>Link</a><br>";
+      echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
+        . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
+        . ": <br>" . audioTag($best_pro->url) . "<br>";
+      echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps . " fps"
+        . ": <br>" . audioTag($best_pro->url) . "<br>";
+      echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality] . ")"
+        . ": <br>" . audioTag($best_pro->url) . "<br>";
     } else {
+      # The stream URLs must be decrypted.
+      # The decryption process requires the video JavaScript file, and the watch-page HTML
+      # must be scraped to find the file's URL.
       echo 'The stream URLs need to be decrypted-- YTScoop does not yet have the functionality to decrypt URLs.';
+      #$watch = getWatchHTML($id); # raw html from the video watch page
+      #$jsname = getJSName($watch); # the location of the JavaScript file
     }
 
 
@@ -79,7 +80,6 @@ if (isset($_GET['url'])) {
     # Add means of measuring time from request to response, for testing
   }
 }
-
 
 function extractID($url) {
   preg_match_all("~(?:v=|\/)([0-9A-Za-z_-]{11}).*~",
@@ -116,5 +116,9 @@ function extractResponseJSON($raw) {
   }
 }
 
+function audioTag($url) {
+  # Creates an HTML audio tag with the given URL as a source.
+  return '<audio src="' . $url . '" controls>';
+}
 
 ?>
