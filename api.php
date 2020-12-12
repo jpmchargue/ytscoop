@@ -57,9 +57,9 @@ if (isset($_GET['url'])) {
         . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
         . ": <br>" . audioTag($best_pro->url) . "<br>";
       echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps . " fps"
-        . ": <br>" . audioTag($best_pro->url) . "<br>";
+        . ": <br>" . audioTag($best_video->url) . "<br>";
       echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality] . ")"
-        . ": <br>" . audioTag($best_pro->url) . "<br>";
+        . ": <br>" . audioTag($best_audio->url) . "<br>";
     } else {
       # The stream URLs must be decrypted.
       # The decryption process requires the video JavaScript file, and the watch-page HTML
@@ -122,7 +122,7 @@ function extractResponseJSON($raw) {
 
 function audioTag($url) {
   # Creates an HTML audio tag with the given URL as a source.
-  return '<audio src="' . $url . '" controls>';
+  return '<audio src="' . $url . '" controls></audio>';
 }
 
 ?>
