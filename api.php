@@ -54,11 +54,12 @@ if (isset($_GET['url'])) {
       || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false)) {
       echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ " . $best_pro->fps
         . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
-        . ": <br><a href=" . $best_pro->url . ">Link</a><br>";
+        . ": <br><a href=" . $best_pro->url . " target='_blank'>Link</a><br>";
+      echo '<video controls width="250"><source src=' . $best_pro->url . '></video>';
       echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps
-        . "fps: <br><a href=" . $best_video->url . ">Link</a><br>";
+        . "fps: <br><a href=" . $best_video->url . " target='_blank'>Link</a><br>";
       echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality]
-        . "): <br><a href=" . $best_audio->url . ">Link</a><br>";
+        . "): <br><a href=" . $best_audio->url . " target='_blank'>Link</a><br>";
     } else {
       echo 'The stream URLs need to be decrypted-- YTScoop does not yet have the functionality to decrypt URLs.';
     }
