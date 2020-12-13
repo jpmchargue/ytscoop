@@ -178,7 +178,7 @@ function getTransformList($js, $func) {
 }
 
 function getActionClass($js, $class) {
-  preg_match_all("~var ".$class."={(.*?)};~#s", $js, $out, PREG_PATTERN_ORDER);
+  preg_match_all("~var ".$class."={(.*?)};~s", $js, $out, PREG_PATTERN_ORDER);
   echo var_dump($out) . '<br>';
   $match = str_replace('\n', ' ', $out[1][0]);
   $returned = explode(', ', $match);
