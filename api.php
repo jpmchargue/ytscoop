@@ -71,8 +71,7 @@ if (isset($_GET['url'])) {
       $jsname = getJSName($watch);
       $js = file_get_contents('https://youtube.com' . $jsname);
       # Find location of cipher function
-      $transform_function_name = getCipherFunctionName($js);
-      echo '<br>' . $transform_function_name;
+      getCipher($js);
     }
 
 
@@ -140,12 +139,12 @@ function getCipher($js) {
   $transform_list = getTransformList($js, $transform_function_name);
   #$action_class = getActionClass($js, explode('.', $transform_list[0])[0]);
   #$js_to_php = getFunctionMapping($action_class);
-  $cipher = [];
-  foreach($transform_list as $t) {
-    $parts = preg_split('~[,)(\.]+~', $str);
-    $cipher[] = array($js_to_php[$parts[1]], intval($parts[3]));
-  }
-  return cipher;
+  #$cipher = [];
+  #foreach($transform_list as $t) {
+  #  $parts = preg_split('~[,)(\.]+~', $str);
+  #  $cipher[] = array($js_to_php[$parts[1]], intval($parts[3]));
+  #}
+  #return cipher;
 }
 
 function getCipherFunctionName($js) {
