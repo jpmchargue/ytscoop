@@ -181,7 +181,8 @@ function getActionClass($js, $class) {
   preg_match_all("~var ".$class."={(.*?)};~s", $js, $out, PREG_PATTERN_ORDER);
   echo var_dump($out) . '<br>';
   $match = str_replace('\n', ' ', $out[1][0]);
-  $returned = explode(', ', $match);
+  $match = str_replace(', ', '|', $match);
+  $returned = explode('|', $match);
   echo var_dump($returned);
   return $returned;
 }
