@@ -131,27 +131,51 @@ function audioTag($url) {
   return '<audio src="' . $url . '" controls></audio>';
 }
 
+function getCipher($js) {
+  # Returns a array of 2-element array.
+  # Each interior array represents a transformation in the signature cipher as follows:
+  # [0] - the name of the PHP function representing the transformation (e.g. cipher_swap)
+  # [1] - the number used as the second argument in the transformation
+  $transform_function_name = getCipherFunctionName($js);
+  $transform_list = getTransformList($js, $transform_function_name);
+  #$action_class = getActionClass($js, explode('.', $transform_list[0])[0]);
+  #$js_to_php = getFunctionMapping($action_class);
+  $cipher = [];
+  foreach($transform_list as $t) {
+    $parts = preg_split('~[,)(\.]+~', $str);
+    $cipher[] = array($js_to_php[$parts[1]], intval($parts[3]));
+  }
+  return cipher;
+}
+
 function getCipherFunctionName($js) {
   $patterns = array(
-        "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        "~\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        '~(?:\b|[^a-zA-Z0-9$])(?P<sig>[a-zA-Z0-9$]{2})\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)~',  # noqa: E501
-        '~(?P<sig>[a-zA-Z0-9$]+)\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)~',  # noqa: E501
+        "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        '~(?:\b|[^a-zA-Z0-9$])(?P<sig>[a-zA-Z0-9$]{2})\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)~',
+        '~(?P<sig>[a-zA-Z0-9$]+)\s*=\s*function\(\s*a\s*\)\s*{\s*a\s*=\s*a\.split\(\s*""\s*\)~',
         '~(["\'])signature\1\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~',
         "~\.sig\|\|(?P<sig>[a-zA-Z0-9$]+)\(~",
-        "~yt\.akamaized\.net/\)\s*\|\|\s*.*?\s*[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?:encodeURIComponent\s*\()?\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        "~\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        "~\bc\s*&&\s*a\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",  # noqa: E501
-        "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~"  # noqa: E501
+        "~yt\.akamaized\.net/\)\s*\|\|\s*.*?\s*[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?:encodeURIComponent\s*\()?\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~\b[a-zA-Z0-9]+\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~\bc\s*&&\s*a\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
+        "~\bc\s*&&\s*[a-zA-Z0-9]+\.set\([^,]+\s*,\s*\([^)]*\)\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~"
     );
     foreach($patterns as $p) {
       if (preg_match_all($p, $js, $out, PREG_PATTERN_ORDER)) {
-        return $out[0][1];
+        return $out[1][0];
       }
     }
     return "";
+}
+
+function getTranformList($js, $func) {
+  preg_match_all("~".$func."=function\(\w\){[a-z=\.\(\"\)]*;(.*);(?:.+)}~",
+    $js, $out, PREG_PATTERN_ORDER);
+  echo var_dump($out);
+  return explode(';', $out[0][1]);
 }
 
 function cipher_reverse($str, $n) {
