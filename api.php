@@ -137,7 +137,7 @@ function getCipher($js) {
   # [1] - the number used as the second argument in the transformation
   $transform_function_name = getCipherFunctionName($js);
   $transform_list = getTransformList($js, $transform_function_name);
-  #$action_class = getActionClass($js, explode('.', $transform_list[0])[0]);
+  $action_class = getActionClass($js, explode('.', $transform_list[0])[0]);
   #$js_to_php = getFunctionMapping($action_class);
   #$cipher = [];
   #foreach($transform_list as $t) {
@@ -174,7 +174,16 @@ function getTransformList($js, $func) {
   preg_match_all("~".$func."=function\(\w\){[a-z=\.\(\"\)]*;(.*);(?:.+)}~",
     $js, $out, PREG_PATTERN_ORDER);
   echo var_dump($out);
-  return explode(';', $out[0][1]);
+  return explode(';', $out[1][0]);
+}
+
+function getActionClass($js, $class) {
+  preg_match_all("~var ".$class."={(.*?)};~#s", $js, $out, PREG_PATTERN_ORDER);
+  echo var_dump($out) . '<br>';
+  $match = str_replace('\n', ' ', $out[1][0]);
+  $returned = explode(', ', $match);
+  echo var_dump($returned);
+  return $returned;
 }
 
 function cipher_reverse($str, $n) {
