@@ -170,7 +170,7 @@ function getCipherFunctionName($js) {
     return "";
 }
 
-function getTranformList($js, $func) {
+function getTransformList($js, $func) {
   preg_match_all("~".$func."=function\(\w\){[a-z=\.\(\"\)]*;(.*);(?:.+)}~",
     $js, $out, PREG_PATTERN_ORDER);
   echo var_dump($out);
