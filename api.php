@@ -197,7 +197,7 @@ function getTransformList($js, $func) {
 function getActionClass($js, $class) {
   preg_match_all("~var ".$class."={(.*?)};~s", $js, $out, PREG_PATTERN_ORDER);
   $match = str_replace('\n', ' ', $out[1][0]);
-  $returned = explode(' ', $match);
+  $returned = explode('},', $match);
   return $returned;
 }
 
@@ -207,7 +207,7 @@ function getFunctionMapping($action_class) {
     $func_name = explode(':', $a)[0];
     if (strpos($a, "reverse") !== false) {
       $map[$func_name] = 'cipher_reverse';
-    } else if strpos(($a, "splice") !== false) {
+    } else if (strpos($a, "splice") !== false) {
       $map[$func_name] = 'cipher_splice';
     } else {
       $map[$func_name] = 'cipher_swap';
