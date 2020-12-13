@@ -54,20 +54,20 @@ if (isset($_GET['url'])) {
     if (property_exists($best_pro, 'url')
       && (strpos($best_pro->url, "signature=") !== false
       || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false))) {
-        $response = array(
-          array(
-            "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
-            "url"=>$best_pro->url
-          ),
-          array(
-            "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
-            "url"=>$best_video->url
-          ),
-          array(
-            "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
-            "url"=>$best_audio->url
-          )
-        );
+      $response = array(
+        array(
+          "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
+          "url"=>$best_pro->url
+        ),
+        array(
+          "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
+          "url"=>$best_video->url
+        ),
+        array(
+          "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
+          "url"=>$best_audio->url
+        )
+      );
       echo json_encode($response);
       echo '<br>';
       echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
@@ -75,7 +75,7 @@ if (isset($_GET['url'])) {
         . ": <br>" . audioTag($best_pro->url) . "<br>";
       echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps . " fps"
         . ": <br>" . audioTag($best_video->url) . "<br>";
-      echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality] . ")"
+      echo "Best Audio Stream: " . strval(round(floatval($best_audio->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")"
         . ": <br>" . audioTag($best_audio->url) . "<br>";
 
     } else {
@@ -89,7 +89,7 @@ if (isset($_GET['url'])) {
       $js = file_get_contents('https://youtube.com' . $jsname);
       # Find location of cipher function
       $cipher = getCipher($js);
-      
+
     }
 
 
@@ -159,10 +159,10 @@ function getCipher($js) {
   $js_to_php = getFunctionMapping($action_class);
   $cipher = [];
   foreach($transform_list as $t) {
-    $parts = preg_split('~[,)(\.]+~', $str);
+    $parts = preg_split('~[,)(\.]+~', $t);
     $cipher[] = array($js_to_php[$parts[1]], intval($parts[3]));
   }
-  return cipher;
+  return $cipher;
 }
 
 function getCipherFunctionName($js) {
