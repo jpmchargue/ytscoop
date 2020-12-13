@@ -54,6 +54,22 @@ if (isset($_GET['url'])) {
     if (property_exists($best_pro, 'url')
       && (strpos($best_pro->url, "signature=") !== false
       || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false))) {
+        $response = array(
+          array(
+            "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
+            "url"=>$best_pro->url
+          ),
+          array(
+            "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
+            "url"=>$best_video->url
+          ),
+          array(
+            "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
+            "url"=>$best_audio->url
+          )
+        );
+      echo json_encode($response);
+      echo '<br>';
       echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
         . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
         . ": <br>" . audioTag($best_pro->url) . "<br>";
@@ -61,6 +77,7 @@ if (isset($_GET['url'])) {
         . ": <br>" . audioTag($best_video->url) . "<br>";
       echo "Best Audio Stream: " . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_pro->audioQuality] . ")"
         . ": <br>" . audioTag($best_audio->url) . "<br>";
+
     } else {
       # The stream URLs must be decrypted.
       # The decryption algorithm can be reverse-engineered via the video's JavaScript file;
@@ -71,7 +88,8 @@ if (isset($_GET['url'])) {
       $jsname = getJSName($watch);
       $js = file_get_contents('https://youtube.com' . $jsname);
       # Find location of cipher function
-      getCipher($js);
+      $cipher = getCipher($js);
+      
     }
 
 
@@ -138,13 +156,13 @@ function getCipher($js) {
   $transform_function_name = getCipherFunctionName($js);
   $transform_list = getTransformList($js, $transform_function_name);
   $action_class = getActionClass($js, explode('.', $transform_list[0])[0]);
-  #$js_to_php = getFunctionMapping($action_class);
-  #$cipher = [];
-  #foreach($transform_list as $t) {
-  #  $parts = preg_split('~[,)(\.]+~', $str);
-  #  $cipher[] = array($js_to_php[$parts[1]], intval($parts[3]));
-  #}
-  #return cipher;
+  $js_to_php = getFunctionMapping($action_class);
+  $cipher = [];
+  foreach($transform_list as $t) {
+    $parts = preg_split('~[,)(\.]+~', $str);
+    $cipher[] = array($js_to_php[$parts[1]], intval($parts[3]));
+  }
+  return cipher;
 }
 
 function getCipherFunctionName($js) {
@@ -173,17 +191,29 @@ function getCipherFunctionName($js) {
 function getTransformList($js, $func) {
   preg_match_all("~".$func."=function\(\w\){[a-z=\.\(\"\)]*;(.*);(?:.+)}~",
     $js, $out, PREG_PATTERN_ORDER);
-  echo var_dump($out);
   return explode(';', $out[1][0]);
 }
 
 function getActionClass($js, $class) {
   preg_match_all("~var ".$class."={(.*?)};~s", $js, $out, PREG_PATTERN_ORDER);
-  echo var_dump($out) . '<br>';
   $match = str_replace('\n', ' ', $out[1][0]);
   $returned = explode(' ', $match);
-  echo var_dump($returned);
   return $returned;
+}
+
+function getFunctionMapping($action_class) {
+  $map = [];
+  foreach($action_class as $a) {
+    $func_name = explode(':', $a)[0];
+    if (strpos($a, "reverse") !== false) {
+      $map[$func_name] = 'cipher_reverse';
+    } else if strpos($a, "splice") !== false) {
+      $map[$func_name] = 'cipher_splice';
+    } else {
+      $map[$func_name] = 'cipher_swap';
+    }
+  }
+  return $map;
 }
 
 function cipher_reverse($str, $n) {
