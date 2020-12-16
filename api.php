@@ -107,7 +107,7 @@ if (isset($_POST['url'])) {
         echo json_encode($response);
       }
 
-    } catch(Exception $e) {
+    } catch(Throwable $t) {
       echo json_encode(array("Unclear error"));
     }
 
