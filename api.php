@@ -16,6 +16,9 @@ if (isset($_GET['url'])) {
     $info = getVideoInfo($id); # raw video info data
     $info_json = extractResponseJSON(urldecode($info));
 
+    # Encrypted URL format testing
+    echo var_dump($info_json->streamingData->formats) . '</br>';  
+
     $num_pro = count($info_json->streamingData->formats);
     echo strval($num_pro) . " progressive streams found<br>";
     $best_pro = NULL;
@@ -69,27 +72,30 @@ if (isset($_GET['url'])) {
         )
       );
       echo json_encode($response);
-      echo '<br>';
-      echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
-        . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
-        . ": <br>" . audioTag($best_pro->url) . "<br>";
-      echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps . " fps"
-        . ": <br>" . audioTag($best_video->url) . "<br>";
-      echo "Best Audio Stream: " . strval(round(floatval($best_audio->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")"
-        . ": <br>" . audioTag($best_audio->url) . "<br>";
+      #echo '<br>';
+      #echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
+      #  . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
+      #  . ": <br>" . audioTag($best_pro->url) . "<br>";
+      #echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps . " fps"
+      #  . ": <br>" . audioTag($best_video->url) . "<br>";
+      #echo "Best Audio Stream: " . strval(round(floatval($best_audio->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")"
+      #  . ": <br>" . audioTag($best_audio->url) . "<br>";
 
     } else {
       # The stream URLs must be decrypted.
       # The decryption algorithm can be reverse-engineered via the video's JavaScript file;
       # the location of this file can be found in the video's watch page HTML.
       echo "The URLs of this video's streams are <i>encrypted</i>.";
+
       # Get the JavaScript file
       $watch = getWatchHTML($id);
       $jsname = getJSName($watch);
       $js = file_get_contents('https://youtube.com' . $jsname);
-      # Find location of cipher function
+
+      # Find location of and parse cipher function
       $cipher = getCipher($js);
 
+      #
     }
 
 
