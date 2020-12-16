@@ -90,7 +90,7 @@ if (isset($_POST['url'])) {
       $best_audio_url = decipherURL($best_audio->signatureCipher, $cipher);
       $response = array(
         array(
-          "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
+          "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps, ".$quality_map[$best_pro->audioQuality]." audio quality",
           "url"=>$best_pro_url
         ),
         array(
@@ -98,7 +98,7 @@ if (isset($_POST['url'])) {
           "url"=>$best_video_url
         ),
         array(
-          "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
+          "desc"=>$quality_map[$best_audio->audioQuality] . " audio quality (" . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps)",
           "url"=>$best_audio_url
         )
       );
