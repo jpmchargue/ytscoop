@@ -108,8 +108,9 @@ if (isset($_POST['url'])) {
       }
 
     } catch(Exception $e) {
-      echo json_encode(array("Unclear error"))
+      echo json_encode(array("Unclear error"));
     }
+
   } else {
     echo json_encode(array("Invalid URL"));
   }
