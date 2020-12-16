@@ -4,8 +4,8 @@
 #ini_set('display_errors', 1);
 #ini_set('display_startup_errors', 1);
 
-#header("Access-Control-Allow-Origin: ytscoop.com");
-header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Origin: ytscoop.com");
+#header('Access-Control-Allow-Origin: *');
 
 
 if (isset($_POST['url'])) {
