@@ -17,7 +17,7 @@ if (isset($_GET['url'])) {
     $info_json = extractResponseJSON(urldecode($info));
 
     # Encrypted URL format testing
-    echo var_dump($info_json->streamingData->formats) . '</br>';  
+    #echo var_dump($info_json->streamingData->formats) . '</br>';
 
     $num_pro = count($info_json->streamingData->formats);
     echo strval($num_pro) . " progressive streams found<br>";
@@ -95,7 +95,25 @@ if (isset($_GET['url'])) {
       # Find location of and parse cipher function
       $cipher = getCipher($js);
 
-      #
+      # Find code and URL, then apply the cipher
+      $best_pro_url = decipherURL($best_pro->signatureCipher, $cipher);
+      $best_video_url = decipherURL($best_video->signatureCipher, $cipher);
+      $best_audio_url = decipherURL($best_audio->signatureCipher, $cipher);
+      $response = array(
+        array(
+          "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
+          "url"=>$best_pro_url
+        ),
+        array(
+          "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
+          "url"=>$best_video_url
+        ),
+        array(
+          "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
+          "url"=>$best_audio_url
+        )
+      );
+      echo json_encode($response);
     }
 
 
@@ -171,6 +189,16 @@ function getCipher($js) {
   return $cipher;
 }
 
+function decipherURL($sig, $cipher) {
+  $pairs = explode('&', $sig);
+  $code = explode('=', $pairs[0])[1];
+  $raw_url = urldecode(explode('=', end($pairs))[1]);
+  foreach($cipher as $step) {
+    $code = $step[0]($code, $step[1];
+  }
+  return $raw_url . '&sig=' . $code;
+}
+
 function getCipherFunctionName($js) {
   $patterns = array(
         "~\b[cs]\s*&&\s*[adf]\.set\([^,]+\s*,\s*encodeURIComponent\s*\(\s*(?P<sig>[a-zA-Z0-9$]+)\(~",
@@ -210,7 +238,7 @@ function getActionClass($js, $class) {
 function getFunctionMapping($action_class) {
   $map = [];
   foreach($action_class as $a) {
-    $func_name = explode(':', $a)[0];
+    $func_name = str_replace(' ', '', explode(':', $a)[0]);
     if (strpos($a, "reverse") !== false) {
       $map[$func_name] = 'cipher_reverse';
     } else if (strpos($a, "splice") !== false) {

@@ -50,3 +50,13 @@ For audio, keep:
 	- audioQuality
 	- averageSampleRate
 	- audioChannels
+
+** SAMPLE ENCRYPTED URL 'signatureCipher' **
+s=bAOQAOq0QJ8wRAIhAL6Wt0iH48BNJl2oEKhypedRIzyoFq9pHQyTlj0Z0VY0AiBi5dKNTw5Rea2GK__sLjvamOAl7OI7EBX40D4dQmjftA%3D%3D
+&sp=sig
+&url=https://r1---sn-fvf-vgql.googlevideo.com/videoplayback%3Fexpire%3D1608110729%26ei%3DKX7ZX6_mKbuDir4P1Z-ioAc%26ip%3D69.47.204.11%26id%3Do-ADbqh9cRs2rFCJZMKN6LLuQdbhLiYCschs9oZbNjjVfU%26itag%3D18%26source%3Dyoutube%26requiressl%3Dyes%26mh%3DU2%26mm%3D31%252C29%26mn%3Dsn-fvf-vgql%252Csn-5ualdnl7%26ms%3Dau%252Crdu%26mv%3Dm%26mvi%3D1%26pl%3D22%26gcr%3Dus%26initcwndbps%3D1767500%26vprv%3D1%26mime%3Dvideo%252Fmp4%26ns%3DBBa1IfwYfEwUffk_ButX5XMF%26gir%3Dyes%26clen%3D15645214%26ratebypass%3Dyes%26dur%3D249.568%26lmt%3D1577004358764790%26mt%3D1608088857%26fvip%3D3%26c%3DWEB%26txp%3D5531432%26n%3DLBlNKtpAxn4z1FL8B%26sparams%3Dexpire%252Cei%252Cip%252Cid%252Citag%252Csource%252Crequiressl%252Cgcr%252Cvprv%252Cmime%252Cns%252Cgir%252Cclen%252Cratebypass%252Cdur%252Clmt%26lsparams%3Dmh%252Cmm%252Cmn%252Cms%252Cmv%252Cmvi%252Cpl%252Cinitcwndbps%26lsig%3DAG3C_xAwRQIgS_3tjaU-umVAkAwCkiiMPjTiOCbkut1h9tYUawtSMgUCIQCrAwQvq8_kdRL3wbcIzbMcIO-EvHBEiyL88uV9-aKCjQ%253D%253D
+
+- explode by ampersands
+- explode by equals to grab code and url
+- perform decipher on code
+- append deciphered code to URL
