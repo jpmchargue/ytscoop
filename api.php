@@ -16,9 +16,6 @@ if (isset($_GET['url'])) {
     $info = getVideoInfo($id); # raw video info data
     $info_json = extractResponseJSON(urldecode($info));
 
-    # Encrypted URL format testing
-    #echo var_dump($info_json->streamingData->formats) . '</br>';
-
     $num_pro = count($info_json->streamingData->formats);
     #echo strval($num_pro) . " progressive streams found<br>";
     $best_pro = NULL;
