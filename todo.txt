@@ -60,3 +60,8 @@ s=bAOQAOq0QJ8wRAIhAL6Wt0iH48BNJl2oEKhypedRIzyoFq9pHQyTlj0Z0VY0AiBi5dKNTw5Rea2GK_
 - explode by equals to grab code and url
 - perform decipher on code
 - append deciphered code to URL
+
+The only files in this folder not involved in the frontend are:
+- .htaccess
+- api.php
+- todo.txt (this file)
