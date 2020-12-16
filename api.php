@@ -194,7 +194,9 @@ function decipherURL($sig, $cipher) {
   $code = explode('=', $pairs[0])[1];
   $raw_url = urldecode(explode('=', end($pairs))[1]);
   foreach($cipher as $step) {
-    $code = $step[0]($code, $step[1];
+    $function = $step[0];
+    echo var_dump($function) . '<br>';
+    $code = $function($code, $step[1]);
   }
   return $raw_url . '&sig=' . $code;
 }
@@ -238,7 +240,7 @@ function getActionClass($js, $class) {
 function getFunctionMapping($action_class) {
   $map = [];
   foreach($action_class as $a) {
-    $func_name = str_replace(' ', '', explode(':', $a)[0]);
+    $func_name = substr(explode(':', $a)[0], -2);
     if (strpos($a, "reverse") !== false) {
       $map[$func_name] = 'cipher_reverse';
     } else if (strpos($a, "splice") !== false) {
