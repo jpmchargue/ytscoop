@@ -12,98 +12,106 @@ if (isset($_POST['url'])) {
   # Fetch stream attributes, stream locations, and cipher JavaScript.
   $url = $_POST['url'];
   if (strpos($url, "youtube.com") !== false || strpos($url, "youtu.be") !== false) {
-    $id = extractID($url);
-    # Fetch necessary information
-    $info = getVideoInfo($id); # raw video info data
-    $info_json = extractResponseJSON(urldecode($info));
+    try {
 
-    $num_pro = count($info_json->streamingData->formats);
-    #echo strval($num_pro) . " progressive streams found<br>";
-    $best_pro = NULL;
-    foreach($info_json->streamingData->formats as $s) {
-      if ($best_pro == NULL || $s->width > $best_pro->width) {
-        $best_pro = $s;
-      }
-    }
+      $id = extractID($url);
+      # Fetch necessary information
+      $info = getVideoInfo($id); # raw video info data
+      $info_json = extractResponseJSON(urldecode($info));
 
-    $num_adapt = count($info_json->streamingData->adaptiveFormats);
-    #echo strval($num_adapt) . " adaptive streams found<br>";
-    $best_video = NULL;
-    $best_audio = NULL;
-    foreach($info_json->streamingData->adaptiveFormats as $s) {
-      $type = substr($s->mimeType, 0, 5);
-      if ($type == "video") {
-        if ($best_video == NULL || $s->width > $best_video->width) {
-          $best_video = $s;
-        } else if ($s->width == $best_video->width && $s->fps > $best_video->fps) {
-          $best_video = $s;
+      $num_pro = count($info_json->streamingData->formats);
+      #echo strval($num_pro) . " progressive streams found<br>";
+      $best_pro = NULL;
+      foreach($info_json->streamingData->formats as $s) {
+        if ($best_pro == NULL || $s->width > $best_pro->width) {
+          $best_pro = $s;
         }
       }
-      else if ($type == "audio") {
-        if ($best_audio == NULL || $s->bitrate > $best_audio->bitrate) {
-          $best_audio = $s;
+
+      $num_adapt = count($info_json->streamingData->adaptiveFormats);
+      #echo strval($num_adapt) . " adaptive streams found<br>";
+      $best_video = NULL;
+      $best_audio = NULL;
+      foreach($info_json->streamingData->adaptiveFormats as $s) {
+        $type = substr($s->mimeType, 0, 5);
+        if ($type == "video") {
+          if ($best_video == NULL || $s->width > $best_video->width) {
+            $best_video = $s;
+          } else if ($s->width == $best_video->width && $s->fps > $best_video->fps) {
+            $best_video = $s;
+          }
+        }
+        else if ($type == "audio") {
+          if ($best_audio == NULL || $s->bitrate > $best_audio->bitrate) {
+            $best_audio = $s;
+          }
         }
       }
-    }
 
-    $quality_map = array(
-      "AUDIO_QUALITY_LOW"=>"low",
-      "AUDIO_QUALITY_MEDIUM"=>"medium",
-      "AUDIO_QUALITY_HIGH"=>"high",
-    );
-
-    if (property_exists($best_pro, 'url')
-      && (strpos($best_pro->url, "signature=") !== false
-      || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false))) {
-      $response = array(
-        array(
-          "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
-          "url"=>$best_pro->url
-        ),
-        array(
-          "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
-          "url"=>$best_video->url
-        ),
-        array(
-          "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
-          "url"=>$best_audio->url
-        )
+      $quality_map = array(
+        "AUDIO_QUALITY_LOW"=>"low",
+        "AUDIO_QUALITY_MEDIUM"=>"medium",
+        "AUDIO_QUALITY_HIGH"=>"high",
       );
-      echo json_encode($response);
 
-    } else {
-      # The stream URLs must be decrypted.
-      # The decryption algorithm can be reverse-engineered via the video's JavaScript file;
-      # the location of this file can be found in the video's watch page HTML.
+      if (property_exists($best_pro, 'url')
+        && (strpos($best_pro->url, "signature=") !== false
+        || (strpos($best_pro->url, "sig=") !== false && strpos($best_pro->url, '&s=') === false))) {
+        $response = array(
+          array(
+            "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps with ".$quality_map[$best_pro->audioQuality]." audio quality",
+            "url"=>$best_pro->url
+          ),
+          array(
+            "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
+            "url"=>$best_video->url
+          ),
+          array(
+            "desc"=>strval(round(floatval($best_pro->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")",
+            "url"=>$best_audio->url
+          )
+        );
+        echo json_encode($response);
 
-      # Get the JavaScript file
-      $watch = getWatchHTML($id);
-      $jsname = getJSName($watch);
-      $js = file_get_contents('https://youtube.com' . $jsname);
+      } else {
+        # The stream URLs must be decrypted.
+        # The decryption algorithm can be reverse-engineered via the video's JavaScript file;
+        # the location of this file can be found in the video's watch page HTML.
 
-      # Find location of and parse cipher function
-      $cipher = getCipher($js);
+        # Get the JavaScript file
+        $watch = getWatchHTML($id);
+        $jsname = getJSName($watch);
+        $js = file_get_contents('https://youtube.com' . $jsname);
 
-      # Find code and URL, then apply the cipher
-      $best_pro_url = decipherURL($best_pro->signatureCipher, $cipher);
-      $best_video_url = decipherURL($best_video->signatureCipher, $cipher);
-      $best_audio_url = decipherURL($best_audio->signatureCipher, $cipher);
-      $response = array(
-        array(
-          "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps, ".$quality_map[$best_pro->audioQuality]." audio quality",
-          "url"=>$best_pro_url
-        ),
-        array(
-          "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
-          "url"=>$best_video_url
-        ),
-        array(
-          "desc"=>$quality_map[$best_audio->audioQuality] . " audio quality (" . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps)",
-          "url"=>$best_audio_url
-        )
-      );
-      echo json_encode($response);
+        # Find location of and parse cipher function
+        $cipher = getCipher($js);
+
+        # Find code and URL, then apply the cipher
+        $best_pro_url = decipherURL($best_pro->signatureCipher, $cipher);
+        $best_video_url = decipherURL($best_video->signatureCipher, $cipher);
+        $best_audio_url = decipherURL($best_audio->signatureCipher, $cipher);
+        $response = array(
+          array(
+            "desc"=>$best_pro->qualityLabel." @ ".$best_pro->fps." fps, ".$quality_map[$best_pro->audioQuality]." audio quality",
+            "url"=>$best_pro_url
+          ),
+          array(
+            "desc"=>$best_video->qualityLabel . " @ " . $best_video->fps . " fps",
+            "url"=>$best_video_url
+          ),
+          array(
+            "desc"=>$quality_map[$best_audio->audioQuality] . " audio quality (" . strval(round(floatval($best_pro->bitrate)/8192)) . " kbps)",
+            "url"=>$best_audio_url
+          )
+        );
+        echo json_encode($response);
+      }
+
+    } catch(Exception $e) {
+      echo json_encode(array("Unclear error"))
     }
+  } else {
+    echo json_encode(array("Invalid URL"));
   }
 }
 
