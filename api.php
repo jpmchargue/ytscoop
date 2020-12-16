@@ -20,7 +20,7 @@ if (isset($_GET['url'])) {
     #echo var_dump($info_json->streamingData->formats) . '</br>';
 
     $num_pro = count($info_json->streamingData->formats);
-    echo strval($num_pro) . " progressive streams found<br>";
+    #echo strval($num_pro) . " progressive streams found<br>";
     $best_pro = NULL;
     foreach($info_json->streamingData->formats as $s) {
       if ($best_pro == NULL || $s->width > $best_pro->width) {
@@ -29,7 +29,7 @@ if (isset($_GET['url'])) {
     }
 
     $num_adapt = count($info_json->streamingData->adaptiveFormats);
-    echo strval($num_adapt) . " adaptive streams found<br>";
+    #echo strval($num_adapt) . " adaptive streams found<br>";
     $best_video = NULL;
     $best_audio = NULL;
     foreach($info_json->streamingData->adaptiveFormats as $s) {
@@ -72,20 +72,11 @@ if (isset($_GET['url'])) {
         )
       );
       echo json_encode($response);
-      #echo '<br>';
-      #echo "Best Progressive Stream: " . $best_pro->qualityLabel . " @ "
-      #  . $best_pro->fps . "fps with " . $quality_map[$best_pro->audioQuality] . " audio quality"
-      #  . ": <br>" . audioTag($best_pro->url) . "<br>";
-      #echo "Best Video Stream: " . $best_video->qualityLabel . " @ " . $best_video->fps . " fps"
-      #  . ": <br>" . audioTag($best_video->url) . "<br>";
-      #echo "Best Audio Stream: " . strval(round(floatval($best_audio->bitrate)/8192)) . " kbps (" . $quality_map[$best_audio->audioQuality] . ")"
-      #  . ": <br>" . audioTag($best_audio->url) . "<br>";
 
     } else {
       # The stream URLs must be decrypted.
       # The decryption algorithm can be reverse-engineered via the video's JavaScript file;
       # the location of this file can be found in the video's watch page HTML.
-      echo "The URLs of this video's streams are <i>encrypted</i>.";
 
       # Get the JavaScript file
       $watch = getWatchHTML($id);
@@ -115,20 +106,6 @@ if (isset($_GET['url'])) {
       );
       echo json_encode($response);
     }
-
-
-    # Send back:
-    # - the video title
-    # - for each of the following streams:
-    #     + the highest-resolution video stream
-    #     + the highest-bitrate audio stream
-    #     + the highest-resolution progressive stream
-    # - include:
-    #     + the deciphered stream URL
-    #     + the dimensions and fps, for video
-    #     + the bitrate, for audio
-
-    # Add means of measuring time from request to response, for testing
   }
 }
 
@@ -195,7 +172,6 @@ function decipherURL($sig, $cipher) {
   $raw_url = urldecode(explode('=', end($pairs))[1]);
   foreach($cipher as $step) {
     $function = $step[0];
-    echo var_dump($function) . '<br>';
     $code = $function($code, $step[1]);
   }
   return $raw_url . '&sig=' . $code;
