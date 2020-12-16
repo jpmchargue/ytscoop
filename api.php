@@ -7,9 +7,9 @@ ini_set('display_startup_errors', 1);
 header("Access-Control-Allow-Origin: ytscoop.com");
 
 
-if (isset($_GET['url'])) {
+if (isset($_POST['url'])) {
   # Fetch stream attributes, stream locations, and cipher JavaScript.
-  $url = $_GET['url'];
+  $url = $_POST['url'];
   if (strpos($url, "youtube.com") !== false || strpos($url, "youtu.be") !== false) {
     $id = extractID($url);
     # Fetch necessary information
