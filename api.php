@@ -236,7 +236,7 @@ function getFunctionMapping($action_class) {
 }
 
 function cipher_reverse($str, $n) {
-  return strrev($str, $n);
+  return strrev($str);
 }
 
 function cipher_splice($str, $n) {
