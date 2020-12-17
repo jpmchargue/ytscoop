@@ -1,0 +1,1 @@
+//var isIE = /*@cc_on!@*/false || !!document.documentMode;
