@@ -1,1 +1,6 @@
 Options -Indexes
+
+# HTTPS Redirect
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://www.ytscoop.com/$1 [R,L]
